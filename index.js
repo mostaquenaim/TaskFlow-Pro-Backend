@@ -5,6 +5,17 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
+// app.use(
+//   cors({
+//       origin: [
+//           // 'http://localhost:5173', 
+//           'https://scc-technovision-inc-12970.web.app',
+//           'https://scc-technovision-inc-12970.firebaseapp.com'
+//   ],
+//   // uncommented credentials
+//       credentials: true
+//   })
+// );
 app.use(cors())
 app.use(express.json())
 
@@ -23,57 +34,57 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-
+    // await client.connect();
     const userColluction = client.db("Task-Management").collection("user");
     const taskColluction = client.db("Task-Management").collection("task");
 
-    app.post('/users',async(req,res)=>{
-        const user = req.body; 
-        const result = await userColluction.insertOne(user);
-        res.send(result)
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await userColluction.insertOne(user);
+      res.send(result)
     })
 
-    app.get('/users',async(req,res)=>{
-        const result = await userColluction.find().toArray()
-        res.send(result)
+    app.get('/users', async (req, res) => {
+      const result = await userColluction.find().toArray()
+      res.send(result)
     })
 
-    app.post('/alltask',async(req,res)=>{
+    app.post('/alltask', async (req, res) => {
       console.log(req.body);
       const task = req.body;
       const result = await taskColluction.insertOne(task)
       res.send(result)
     })
 
-    app.get('/alltask',async(req,res)=>{
+    app.get('/alltask', async (req, res) => {
       const email = req.query?.email
-      const result = await taskColluction.find({email:email}).toArray()
-      res.send(result)
-    })
- 
-    app.put('/alltask/:id',async(req,res)=>{
-      const id = req.params.id;
-      const filter = {_id: new ObjectId(id)}
-      const options = { upsert: true };
-      const status = req.body.status;
-      const updatedDoc = {
-        $set:{
-          status: status
-        }
-      }
-      const result = await taskColluction.updateOne(filter,updatedDoc,options)
+      const result = await taskColluction.find({ email: email }).toArray()
       res.send(result)
     })
 
-    app.delete('/alltask/:id',async(req,res)=>{
+    app.put('/alltask/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id : new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const status = req.body.status;
+      const updatedDoc = {
+        $set: {
+          status: status
+        }
+      }
+      const result = await taskColluction.updateOne(filter, updatedDoc, options)
+      res.send(result)
+    })
+
+    app.delete('/alltask/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
       const result = await taskColluction.deleteOne(filter)
       res.send(result)
     })
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
